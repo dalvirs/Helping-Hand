@@ -21,12 +21,6 @@ class SignUpViewController : UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         errorLabel.alpha = 0
-        //        Utilities.styleTextField(password)
-        //        Utilities.styleTextField(phoneNumber)
-        //        Utilities.styleTextField(email)
-        //        Utilities.styleTextField(firstName)
-        //        Utilities.styleTextField(lastName)
-        //        Utilities.styleFilledButton(signUpBtn)
     }
     
     @IBAction func signUpPressed(_ sender: Any) {
@@ -41,25 +35,39 @@ class SignUpViewController : UIViewController {
             self.errorLabel.alpha = 1
             return
         }
-            Auth.auth().createUser(withEmail: emailString, password: passwordString) { (auth, err) in
-                if (err != nil) {
-                    self.errorLabel.text = err!.localizedDescription
-                    self.errorLabel.alpha = 1
-                } else {
-                    let db = Firestore.firestore()
-                    db.collection("users").document(auth!.user.uid).setData(
-                        ["first_name" : firstNameString,
-                         "last_name" : lastNameString,
-                         "email" : emailString,
-                         "phone_number" : phoneNumberString]) { err in
-                             if (err != nil) {
-                                 self.errorLabel.text = "Can not add data to database"
-                                 self.errorLabel.alpha = 1
-                             }
+        Auth.auth().createUser(withEmail: emailString, password: passwordString) { (auth, err) in
+            if (err != nil) {
+                self.errorLabel.text = err!.localizedDescription
+                self.errorLabel.alpha = 1
+            } else {
+                let db = Firestore.firestore()
+                db.collection("users").document(auth!.user.uid).setData(
+                    ["first_name" : firstNameString,
+                     "last_name" : lastNameString,
+                     "email" : emailString,
+                     "phone_number" : phoneNumberString]) { err in
+                         if (err != nil) {
+                             self.errorLabel.text = "Can not add data to database"
+                             self.errorLabel.alpha = 1
                          }
-                }
+                         else {
+                             let displayNameVc = self.storyboard?.instantiateViewController(withIdentifier: "displayNameController") as! DisplayNameViewController
+                             self.navigationController?.pushViewController(displayNameVc, animated: true)
+                         }
+                     }
             }
+        }
         
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: animated)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
     }
     
     
